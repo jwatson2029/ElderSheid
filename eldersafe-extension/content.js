@@ -1,6 +1,7 @@
 /**
  * ElderSafe — content script
- * Scans the DOM for scam signals, shows banner, enforces Maximum Protection lock.
+ * Full-screen block when a threat is detected (no “continue anyway” on the page).
+ * Maximum Protection lock uses a separate, higher z-index overlay.
  */
 
 (function () {
@@ -37,11 +38,13 @@
   const WHITELIST_KEY = 'whitelist';
   const SCAN_INTERVAL_MS = 2500;
 
-  let bannerEl = null;
+  let blockRoot = null;
+  let blockOverlay = null;
   let lockEl = null;
-  let lastScore = 0;
   let scanTimer = null;
   let protectionActive = true;
+  let blockVisible = false;
+  let lockVisible = false;
 
   function log(...args) {
     console.log(LOG, ...args);
@@ -64,6 +67,7 @@
   }
 
   function collectVisibleText() {
+    if (!document.body) return '';
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
       acceptNode(node) {
         if (!node.parentElement) return NodeFilter.FILTER_REJECT;
@@ -147,36 +151,70 @@
     return { score, reason: primary, reasons };
   }
 
-  function ensureBanner() {
-    if (bannerEl) return bannerEl;
-    const root = document.createElement('div');
-    root.id = 'eldersafe-root';
-    bannerEl = document.createElement('div');
-    bannerEl.id = 'eldersafe-banner';
-    bannerEl.setAttribute('role', 'alert');
-    bannerEl.innerHTML = `
-      <div class="eldersafe-inner">
-        <span class="eldersafe-badge">⚠ ElderSafe Alert</span>
-        <div class="eldersafe-body">
-          <p class="eldersafe-title">This page may be dangerous</p>
-          <p class="eldersafe-msg" id="eldersafe-msg"></p>
-          <div class="eldersafe-meter" aria-hidden="true"><span id="eldersafe-meter-fill" style="width:0%"></span></div>
-          <div class="eldersafe-actions">
-            <button type="button" class="btn-primary" id="eldersafe-back">Go back safely</button>
-            <button type="button" class="btn-ghost" id="eldersafe-dismiss">I understand the risk</button>
-            <button type="button" class="btn-danger-outline" id="eldersafe-report">Report scam</button>
-          </div>
+  function setPageScrollLocked(locked) {
+    const o = locked ? 'hidden' : '';
+    document.documentElement.style.overflow = o;
+    document.body.style.overflow = o;
+  }
+
+  function updateScrollLock() {
+    setPageScrollLocked(blockVisible || lockVisible);
+  }
+
+  function trapEscape(e) {
+    if (!blockVisible) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    }
+  }
+
+  function ensureBlockOverlay() {
+    if (blockOverlay) return blockOverlay;
+
+    blockRoot = document.createElement('div');
+    blockRoot.id = 'eldersafe-root';
+
+    blockOverlay = document.createElement('div');
+    blockOverlay.id = 'eldersafe-block-overlay';
+    blockOverlay.setAttribute('role', 'alertdialog');
+    blockOverlay.setAttribute('aria-modal', 'true');
+    blockOverlay.setAttribute('aria-labelledby', 'eldersafe-block-title');
+    blockOverlay.innerHTML = `
+      <div class="eldersafe-block-backdrop" aria-hidden="true"></div>
+      <div class="eldersafe-block-panel">
+        <span class="eldersafe-badge">⚠ ElderSafe — full-screen block</span>
+        <h2 class="eldersafe-title" id="eldersafe-block-title">This page may be dangerous</h2>
+        <p class="eldersafe-msg" id="eldersafe-msg"></p>
+        <p class="eldersafe-sub">The site underneath stays visible but blurred. You cannot use it until you leave or close this tab. There is no “continue anyway” button here — a caregiver can whitelist the domain in ElderSafe settings.</p>
+        <div class="eldersafe-meter" aria-hidden="true"><span id="eldersafe-meter-fill" style="width:0%"></span></div>
+        <div class="eldersafe-actions">
+          <button type="button" class="btn-primary" id="eldersafe-back">Go back safely</button>
+          <button type="button" class="btn-ghost" id="eldersafe-close-tab">Close this tab</button>
+          <button type="button" class="btn-danger-outline" id="eldersafe-report">Report scam</button>
         </div>
       </div>
     `;
-    root.appendChild(bannerEl);
-    document.documentElement.appendChild(root);
+
+    blockRoot.appendChild(blockOverlay);
+    document.documentElement.appendChild(blockRoot);
+
+    blockOverlay.addEventListener(
+      'click',
+      (e) => {
+        if (e.target === blockOverlay || e.target.classList.contains('eldersafe-block-backdrop')) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      true
+    );
 
     document.getElementById('eldersafe-back').addEventListener('click', () => {
       window.history.back();
     });
-    document.getElementById('eldersafe-dismiss').addEventListener('click', () => {
-      hideBanner();
+    document.getElementById('eldersafe-close-tab').addEventListener('click', () => {
+      chrome.runtime.sendMessage({ type: 'CLOSE_TAB' }, () => void chrome.runtime.lastError);
     });
     document.getElementById('eldersafe-report').addEventListener('click', () => {
       chrome.runtime.sendMessage({
@@ -185,18 +223,20 @@
       });
     });
 
-    return bannerEl;
+    document.addEventListener('keydown', trapEscape, true);
+
+    return blockOverlay;
   }
 
-  function showBanner(threat) {
-    const el = ensureBanner();
+  function showBlockOverlay(threat) {
+    const el = ensureBlockOverlay();
     document.getElementById('eldersafe-msg').textContent =
-      threat.reason + ' — ask a family member before entering personal information or sending money.';
+      threat.reason + ' — do not enter passwords, codes, or send money. Talk to a family member first.';
     const fill = document.getElementById('eldersafe-meter-fill');
     fill.style.width = threat.score + '%';
-    el.classList.add('eldersafe-visible');
-    document.body.style.marginTop = el.offsetHeight + 'px';
-    lastScore = threat.score;
+    el.classList.add('eldersafe-block-visible');
+    blockVisible = true;
+    updateScrollLock();
 
     chrome.runtime.sendMessage(
       { type: 'THREAT_DETECTED', confidence: threat.score, reason: threat.reason },
@@ -204,10 +244,11 @@
     );
   }
 
-  function hideBanner() {
-    if (!bannerEl) return;
-    bannerEl.classList.remove('eldersafe-visible');
-    document.body.style.marginTop = '';
+  function hideBlockOverlay() {
+    if (!blockOverlay) return;
+    blockOverlay.classList.remove('eldersafe-block-visible');
+    blockVisible = false;
+    updateScrollLock();
   }
 
   function ensureLockOverlay() {
@@ -259,10 +300,16 @@
   function showLock() {
     const el = ensureLockOverlay();
     el.classList.add('eldersafe-lock-visible');
+    lockVisible = true;
+    updateScrollLock();
   }
 
   function hideLock() {
-    if (lockEl) lockEl.classList.remove('eldersafe-lock-visible');
+    if (lockEl) {
+      lockEl.classList.remove('eldersafe-lock-visible');
+    }
+    lockVisible = false;
+    updateScrollLock();
   }
 
   async function refreshLockState() {
@@ -277,7 +324,7 @@
 
   function runScan() {
     if (!protectionActive) {
-      hideBanner();
+      hideBlockOverlay();
       return;
     }
 
@@ -285,21 +332,21 @@
       if (chrome.runtime.lastError) return;
       protectionActive = data.protectionActive !== false;
       if (!protectionActive) {
-        hideBanner();
+        hideBlockOverlay();
         return;
       }
 
       const host = getHostname();
       if (isWhitelisted(host, data[WHITELIST_KEY])) {
-        hideBanner();
+        hideBlockOverlay();
         return;
       }
 
       const threat = computeThreat();
       if (threat.score >= 55) {
-        showBanner(threat);
-      } else if (bannerEl?.classList.contains('eldersafe-visible') && threat.score < 40) {
-        hideBanner();
+        showBlockOverlay(threat);
+      } else if (blockOverlay?.classList.contains('eldersafe-block-visible') && threat.score < 40) {
+        hideBlockOverlay();
       }
     });
   }
@@ -308,7 +355,7 @@
     refreshLockState();
     runScan();
     scanTimer = window.setInterval(runScan, SCAN_INTERVAL_MS);
-    log('Scanner started');
+    log('Scanner started (full-screen block mode)');
   }
 
   chrome.storage.onChanged.addListener((changes, area) => {
@@ -324,12 +371,13 @@
   });
 
   chrome.runtime.onMessage.addListener((msg) => {
-    if (msg?.type === 'FOCUS_BANNER' && bannerEl?.classList.contains('eldersafe-visible')) {
-      bannerEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      bannerEl.style.outline = '2px solid #00d4aa';
-      window.setTimeout(() => {
-        bannerEl.style.outline = '';
-      }, 1600);
+    if (msg?.type === 'FOCUS_BANNER' && blockOverlay?.classList.contains('eldersafe-block-visible')) {
+      const panel = blockOverlay.querySelector('.eldersafe-block-panel');
+      if (panel) {
+        panel.classList.remove('eldersafe-pulse');
+        void panel.offsetWidth;
+        panel.classList.add('eldersafe-pulse');
+      }
     }
   });
 

@@ -1,5 +1,5 @@
 /**
- * ElderSafe — popup dashboard
+ * ElderSafe — full-page options (replaces popup)
  */
 
 (function () {
@@ -85,7 +85,7 @@
     chrome.runtime.sendMessage({ type: 'DISABLE_MAX_PROTECTION' }, () => refreshStats());
   });
 
-  document.getElementById('btn-whitelist').addEventListener('click', () => {
+  el('btn-whitelist').addEventListener('click', () => {
     const host = whitelistInput.value.trim().toLowerCase().replace(/^https?:\/\//, '').split('/')[0];
     if (!host) return;
     chrome.storage.local.get(['whitelist'], (d) => {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ElderSafe</title>
+  <title>ElderSafe — Settings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
@@ -19,46 +19,45 @@
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      width: 360px;
-      min-height: 480px;
+      min-height: 100vh;
       font-family: Inter, system-ui, sans-serif;
       background: linear-gradient(160deg, var(--navy) 0%, #020617 100%);
       color: var(--text);
-      padding: 0;
+      padding: 24px;
     }
-    .wrap { padding: 16px; }
+    .max-w { max-width: 520px; margin: 0 auto; }
     header {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 12px;
+      margin-bottom: 24px;
     }
-    header img { width: 36px; height: 36px; }
+    header img { width: 40px; height: 40px; }
     h1 {
       font-family: "Space Grotesk", Inter, sans-serif;
-      font-size: 18px;
+      font-size: 22px;
       margin: 0;
       letter-spacing: -0.02em;
     }
-    .sub { font-size: 12px; color: var(--muted); margin: 2px 0 0; }
+    .sub { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
     .card {
       background: rgba(30, 41, 59, 0.75);
       border: 1px solid rgba(148, 163, 184, 0.15);
       border-radius: 16px;
-      padding: 14px;
-      margin-bottom: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
       backdrop-filter: blur(10px);
     }
     .row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
+      gap: 12px;
+      margin-bottom: 12px;
     }
     .row:last-child { margin-bottom: 0; }
-    .label { font-size: 12px; color: var(--muted); }
-    .value { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 18px; }
+    .label { font-size: 13px; color: var(--muted); }
+    .value { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 20px; }
     .pill {
       display: inline-flex;
       align-items: center;
@@ -117,58 +116,59 @@
       border: 1px solid rgba(148, 163, 184, 0.3);
       background: rgba(15, 23, 42, 0.6);
       color: #fff;
-      font-size: 13px;
+      font-size: 14px;
       margin-top: 6px;
     }
     button.primary {
       width: 100%;
-      margin-top: 10px;
-      padding: 10px;
+      margin-top: 12px;
+      padding: 12px;
       border: none;
       border-radius: 12px;
       background: var(--emerald);
       color: var(--navy);
       font-weight: 700;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 14px;
     }
     button.primary:disabled { opacity: 0.5; cursor: not-allowed; }
     button.ghost {
       width: 100%;
       margin-top: 8px;
-      padding: 8px;
+      padding: 10px;
       border-radius: 10px;
       border: 1px solid rgba(148, 163, 184, 0.35);
       background: transparent;
       color: var(--text);
       cursor: pointer;
-      font-size: 12px;
+      font-size: 13px;
     }
-    .hint { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.4; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.45; }
     .kbd {
       font-family: ui-monospace, monospace;
-      font-size: 10px;
+      font-size: 11px;
       background: rgba(255,255,255,0.08);
       padding: 2px 6px;
       border-radius: 4px;
     }
     footer {
-      font-size: 10px;
+      font-size: 11px;
       color: var(--muted);
       text-align: center;
-      padding: 8px 12px 14px;
+      margin-top: 28px;
+      padding-top: 16px;
       border-top: 1px solid rgba(148, 163, 184, 0.12);
     }
-    .err { color: #fda4af; font-size: 12px; margin-top: 6px; min-height: 1em; }
+    .err { color: #fda4af; font-size: 13px; margin-top: 8px; min-height: 1em; }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="max-w">
     <header>
       <img src="assets/shield.svg" alt="" />
       <div>
         <h1>ElderSafe</h1>
-        <p class="sub">Calm protection for people you love</p>
+        <p class="sub">Click the toolbar icon anytime to open these settings.</p>
       </div>
     </header>
 
@@ -188,38 +188,36 @@
         <div class="label">All-time interventions</div>
         <div class="value" id="stat-total">0</div>
       </div>
-      <div class="label">AI confidence (last threat)</div>
+      <div class="label">Confidence (last threat)</div>
       <div class="meter"><span id="meter-fill" style="width: 0%"></span></div>
       <p class="hint" id="last-reason">No recent warnings on this profile.</p>
     </div>
 
     <div class="card">
-      <div class="row">
-        <div>
-          <div class="label">Maximum Protection</div>
-          <p class="hint" style="margin:0">Password lock each browser session.</p>
-        </div>
-      </div>
+      <div class="label" style="margin-bottom:8px">Maximum Protection</div>
+      <p class="hint" style="margin-top:0">Locks the whole browser until the family password is entered each session.</p>
       <div id="max-setup">
-        <label class="label">Create family password (min 4 characters)</label>
+        <label class="label">Family password (min 4 characters)</label>
         <input type="password" id="max-password" autocomplete="new-password" placeholder="Choose a password" />
         <button type="button" class="primary" id="btn-enable-max">Enable Maximum Protection</button>
         <p class="err" id="max-err"></p>
       </div>
       <div id="max-active" style="display:none">
-        <p class="hint">Maximum Protection is <strong style="color:var(--emerald)">on</strong>. New sessions require the password.</p>
+        <p class="hint">Maximum Protection is <strong style="color:var(--emerald)">on</strong>.</p>
         <button type="button" class="ghost" id="btn-disable-max">Turn off Maximum Protection</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="label">Trust this site</div>
+      <div class="label">Trust this site (whitelist)</div>
       <input type="text" id="whitelist-input" placeholder="e.g. chase.com" />
       <button type="button" class="primary" id="btn-whitelist">Add to whitelist</button>
-      <p class="hint">Shortcuts: <span class="kbd">Alt+Shift+E</span> focus warning • <span class="kbd">Alt+Shift+S</span> tip</p>
+      <p class="hint">Dangerous pages are blocked full-screen and cannot be dismissed from the page — only go back, close the tab, or whitelist here.</p>
+      <p class="hint">Shortcuts: <span class="kbd">Alt+Shift+E</span> pulse warning • <span class="kbd">Alt+Shift+S</span> open this page</p>
     </div>
+
+    <footer>ElderSafe assists families — it does not replace human judgment.</footer>
   </div>
-  <footer>ElderSafe assists families — it does not replace human judgment.</footer>
-  <script src="popup.js"></script>
+  <script src="options.js"></script>
 </body>
 </html>

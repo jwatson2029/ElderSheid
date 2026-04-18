@@ -9,14 +9,14 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_popup": "popup.html",
-    "default_title": "ElderSafe",
+    "default_title": "ElderSafe — open settings",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
+  "options_page": "options.html",
   "background": {
     "service_worker": "background.js",
     "type": "module"
@@ -45,14 +45,14 @@
         "default": "Alt+Shift+E",
         "mac": "Alt+Shift+E"
       },
-      "description": "Focus ElderSafe banner / report last threat"
+      "description": "Pulse full-screen ElderSafe warning (if visible)"
     },
     "open-eldersafe-popup": {
       "suggested_key": {
         "default": "Alt+Shift+S",
         "mac": "Alt+Shift+S"
       },
-      "description": "Open ElderSafe dashboard"
+      "description": "Open ElderSafe settings"
     }
   }
 }

@@ -1,143 +1,140 @@
-/* ElderSafe content UI — matches website: navy, emerald, danger */
+/* ElderSafe content UI — full-screen block + max protection lock */
 
 #eldersafe-root {
   all: initial;
   font-family: Inter, system-ui, -apple-system, sans-serif;
   box-sizing: border-box;
-  z-index: 2147483646;
-  position: relative;
 }
 
-#eldersafe-banner {
+/* Full-screen threat block (under max-protection lock) */
+#eldersafe-block-overlay {
+  all: initial;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
   position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 2147483647;
+  inset: 0;
+  z-index: 2147483646;
   display: none;
-  padding: 12px 16px;
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.97) 0%, rgba(30, 41, 59, 0.98) 100%);
-  border-bottom: 2px solid #e11d48;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  pointer-events: auto;
+}
+
+#eldersafe-block-overlay.eldersafe-block-visible {
+  display: flex;
+}
+
+#eldersafe-block-overlay .eldersafe-block-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+#eldersafe-block-overlay .eldersafe-block-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  max-height: min(90vh, 640px);
+  overflow-y: auto;
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.99) 100%);
+  border: 2px solid #e11d48;
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow:
+    0 0 0 1px rgba(0, 212, 170, 0.25),
+    0 24px 80px rgba(0, 0, 0, 0.55);
   color: #f8fafc;
-  font-size: 14px;
-  line-height: 1.45;
-  animation: eldersafe-slide-in 0.35s ease-out;
+  pointer-events: auto;
+  animation: eldersafe-panel-in 0.4s ease-out;
 }
 
-#eldersafe-banner.eldersafe-visible {
-  display: block;
-}
-
-@keyframes eldersafe-slide-in {
+@keyframes eldersafe-panel-in {
   from {
-    transform: translateY(-100%);
     opacity: 0;
+    transform: scale(0.94) translateY(12px);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-#eldersafe-banner .eldersafe-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex-wrap: wrap;
+@keyframes eldersafe-pulse-ring {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(0, 212, 170, 0.45),
+      0 24px 80px rgba(0, 0, 0, 0.55);
+  }
+  70% {
+    box-shadow:
+      0 0 0 14px rgba(0, 212, 170, 0),
+      0 24px 80px rgba(0, 0, 0, 0.55);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(0, 212, 170, 0),
+      0 24px 80px rgba(0, 0, 0, 0.55);
+  }
 }
 
-#eldersafe-banner .eldersafe-badge {
-  flex-shrink: 0;
+.eldersafe-block-panel.eldersafe-pulse {
+  animation: eldersafe-panel-in 0.4s ease-out, eldersafe-pulse-ring 1.2s ease-out;
+}
+
+#eldersafe-block-overlay .eldersafe-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(225, 29, 72, 0.2);
+  background: rgba(225, 29, 72, 0.22);
   color: #fda4af;
   font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(225, 29, 72, 0.45);
+  border: 1px solid rgba(225, 29, 72, 0.5);
+  margin-bottom: 16px;
 }
 
-#eldersafe-banner .eldersafe-body {
-  flex: 1;
-  min-width: 200px;
-}
-
-#eldersafe-banner .eldersafe-title {
+#eldersafe-block-overlay .eldersafe-title {
   font-family: "Space Grotesk", Inter, sans-serif;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 22px;
   color: #fff;
-  margin: 0 0 4px;
+  margin: 0 0 10px;
+  line-height: 1.25;
 }
 
-#eldersafe-banner .eldersafe-msg {
-  margin: 0;
-  color: #cbd5e1;
-  font-size: 13px;
-}
-
-#eldersafe-banner .eldersafe-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  margin-top: 10px;
-}
-
-#eldersafe-banner button {
-  font: inherit;
-  cursor: pointer;
-  border-radius: 10px;
-  padding: 8px 14px;
-  font-weight: 600;
-  font-size: 13px;
-  border: none;
-  transition: transform 0.15s ease, filter 0.15s ease;
-}
-
-#eldersafe-banner button:hover {
-  filter: brightness(1.08);
-}
-
-#eldersafe-banner button:active {
-  transform: scale(0.98);
-}
-
-#eldersafe-banner .btn-primary {
-  background: #00d4aa;
-  color: #0f172a;
-}
-
-#eldersafe-banner .btn-ghost {
-  background: rgba(255, 255, 255, 0.08);
+#eldersafe-block-overlay .eldersafe-msg {
+  margin: 0 0 12px;
   color: #e2e8f0;
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
-#eldersafe-banner .btn-danger-outline {
-  background: transparent;
-  color: #fda4af;
-  border: 1px solid rgba(225, 29, 72, 0.55);
+#eldersafe-block-overlay .eldersafe-sub {
+  margin: 0 0 16px;
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
-#eldersafe-banner .eldersafe-meter {
-  margin-top: 8px;
-  height: 6px;
+#eldersafe-block-overlay .eldersafe-meter {
+  height: 8px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   overflow: hidden;
-  max-width: 220px;
+  margin-bottom: 18px;
 }
 
-#eldersafe-banner .eldersafe-meter > span {
+#eldersafe-block-overlay .eldersafe-meter > span {
   display: block;
   height: 100%;
   border-radius: 999px;
@@ -145,20 +142,65 @@
   transition: width 0.4s ease;
 }
 
-/* Max protection lock overlay */
+#eldersafe-block-overlay .eldersafe-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#eldersafe-block-overlay button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  width: 100%;
+}
+
+#eldersafe-block-overlay button:hover {
+  filter: brightness(1.08);
+}
+
+#eldersafe-block-overlay button:active {
+  transform: scale(0.99);
+}
+
+#eldersafe-block-overlay .btn-primary {
+  background: #00d4aa;
+  color: #0f172a;
+}
+
+#eldersafe-block-overlay .btn-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+#eldersafe-block-overlay .btn-danger-outline {
+  background: transparent;
+  color: #fda4af;
+  border: 1px solid rgba(225, 29, 72, 0.55);
+}
+
+/* Max protection lock — always above threat block */
 #eldersafe-lock-overlay {
   all: initial;
   font-family: Inter, system-ui, sans-serif;
   box-sizing: border-box;
   position: fixed;
   inset: 0;
-  z-index: 2147483645;
+  z-index: 2147483647;
   background: rgba(15, 23, 42, 0.94);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: none;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  pointer-events: auto;
 }
 
 #eldersafe-lock-overlay.eldersafe-lock-visible {

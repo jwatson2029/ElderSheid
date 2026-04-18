@@ -96,6 +96,17 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         return;
       }
 
+      if (message?.type === 'CLOSE_TAB') {
+        const tabId = _sender?.tab?.id;
+        if (tabId != null) {
+          await chrome.tabs.remove(tabId);
+          sendResponse({ ok: true });
+        } else {
+          sendResponse({ ok: false, error: 'no_tab' });
+        }
+        return;
+      }
+
       if (message?.type === 'VERIFY_MAX_PASSWORD') {
         const { maxPasswordHash } = await getLocal(['maxPasswordHash']);
         const attempt = String(message.password || '');
@@ -161,10 +172,14 @@ function sendToastOptional(title, msg) {
   showToast(title, msg);
 }
 
+chrome.action.onClicked.addListener(() => {
+  chrome.runtime.openOptionsPage();
+});
+
 chrome.commands.onCommand.addListener(async (command) => {
   log('Command:', command);
   if (command === 'open-eldersafe-popup') {
-    showToast('ElderSafe', 'Click the ElderSafe shield icon in your toolbar to open the dashboard.');
+    chrome.runtime.openOptionsPage();
   }
   if (command === 'toggle-protection-overlay') {
     try {
