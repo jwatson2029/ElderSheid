@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>LOCAL TEST ONLY — Fake bank login (ElderSafe fixture)</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 28rem; margin: 2rem auto; padding: 1rem; }
+    .banner { background: #fef3c7; border: 1px solid #f59e0b; padding: 0.75rem; margin-bottom: 1rem; font-size: 0.875rem; }
+    label { display: block; margin-top: 0.75rem; }
+    input { width: 100%; padding: 0.5rem; margin-top: 0.25rem; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <strong>Fixture for ElderSafe.</strong> This file is not a real site. Do not enter real passwords.
+  </div>
+
+  <h1>Account security</h1>
+
+  <!-- Multiple urgency + scam phrases to exercise content.js heuristics -->
+  <p>
+    Your account has been <strong>suspended</strong>. <strong>Act now</strong> — you must
+    <strong>verify your account</strong> <strong>within 24 hours</strong> or we will take
+    <strong>legal action</strong>. This is a <strong>limited time</strong> window.
+    <strong>Click here now</strong> to avoid losing access.
+  </p>
+  <p>
+    To restore access, purchase a <strong>gift card</strong> and complete a
+    <strong>wire transfer</strong>. We also accept <strong>bitcoin</strong> and
+    <strong>cryptocurrency</strong>. <strong>Send money</strong> today to
+    <strong>recover your funds</strong>.
+  </p>
+
+  <form action="#" method="get" autocomplete="off">
+    <label>Email <input type="email" name="e" /></label>
+    <label>Password <input type="password" name="p" /></label>
+    <button type="submit" style="margin-top:1rem;">Verify immediately</button>
+  </form>
+</body>
+</html>
