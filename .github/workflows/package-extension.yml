@@ -1,0 +1,53 @@
+# Packages the ElderSafe Chrome extension as a Web Store–ready ZIP (manifest at root).
+# Download: Actions tab → workflow run → Artifacts → eldersafe-extension.zip
+
+name: Package extension
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'eldersafe-extension/**'
+      - '.github/workflows/package-extension.yml'
+  pull_request:
+    paths:
+      - 'eldersafe-extension/**'
+      - '.github/workflows/package-extension.yml'
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create ZIP (Chrome-ready layout)
+        id: pack
+        run: |
+          set -euo pipefail
+          VERSION="$(jq -r '.version' eldersafe-extension/manifest.json)"
+          OUT="eldersafe-extension-v${VERSION}.zip"
+          (cd eldersafe-extension && zip -r "../${OUT}" . -x '*.git*' -x '**/.DS_Store')
+          echo "zip_path=${OUT}" >> "${GITHUB_OUTPUT}"
+          ls -la "$OUT"
+
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eldersafe-extension-zip
+          path: ${{ steps.pack.outputs.zip_path }}
+          if-no-files-found: error
+
+      - name: Summary — where to download
+        run: |
+          {
+            echo '### ElderSafe extension package'
+            echo ''
+            echo '**Download the ZIP:** on this run’s page, open the **Artifacts** section below the job log and click **eldersafe-extension-zip**.'
+            echo ''
+            echo 'The archive is Chrome Web Store–ready (`manifest.json` at the root).'
+          } >> "$GITHUB_STEP_SUMMARY"
