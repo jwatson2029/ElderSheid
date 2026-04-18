@@ -1,0 +1,230 @@
+/* ElderSafe content UI — matches website: navy, emerald, danger */
+
+#eldersafe-root {
+  all: initial;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+  z-index: 2147483646;
+  position: relative;
+}
+
+#eldersafe-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 2147483647;
+  display: none;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.97) 0%, rgba(30, 41, 59, 0.98) 100%);
+  border-bottom: 2px solid #e11d48;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  color: #f8fafc;
+  font-size: 14px;
+  line-height: 1.45;
+  animation: eldersafe-slide-in 0.35s ease-out;
+}
+
+#eldersafe-banner.eldersafe-visible {
+  display: block;
+}
+
+@keyframes eldersafe-slide-in {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+#eldersafe-banner .eldersafe-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+#eldersafe-banner .eldersafe-badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(225, 29, 72, 0.2);
+  color: #fda4af;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(225, 29, 72, 0.45);
+}
+
+#eldersafe-banner .eldersafe-body {
+  flex: 1;
+  min-width: 200px;
+}
+
+#eldersafe-banner .eldersafe-title {
+  font-family: "Space Grotesk", Inter, sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  margin: 0 0 4px;
+}
+
+#eldersafe-banner .eldersafe-msg {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+#eldersafe-banner .eldersafe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+#eldersafe-banner button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+#eldersafe-banner button:hover {
+  filter: brightness(1.08);
+}
+
+#eldersafe-banner button:active {
+  transform: scale(0.98);
+}
+
+#eldersafe-banner .btn-primary {
+  background: #00d4aa;
+  color: #0f172a;
+}
+
+#eldersafe-banner .btn-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+#eldersafe-banner .btn-danger-outline {
+  background: transparent;
+  color: #fda4af;
+  border: 1px solid rgba(225, 29, 72, 0.55);
+}
+
+#eldersafe-banner .eldersafe-meter {
+  margin-top: 8px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  max-width: 220px;
+}
+
+#eldersafe-banner .eldersafe-meter > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #00d4aa, #5eead4);
+  transition: width 0.4s ease;
+}
+
+/* Max protection lock overlay */
+#eldersafe-lock-overlay {
+  all: initial;
+  font-family: Inter, system-ui, sans-serif;
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  z-index: 2147483645;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(10px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#eldersafe-lock-overlay.eldersafe-lock-visible {
+  display: flex;
+}
+
+#eldersafe-lock-overlay .eldersafe-lock-card {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(0, 212, 170, 0.35);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  color: #f1f5f9;
+}
+
+#eldersafe-lock-overlay h2 {
+  font-family: "Space Grotesk", Inter, sans-serif;
+  font-size: 22px;
+  margin: 0 0 8px;
+  color: #fff;
+}
+
+#eldersafe-lock-overlay p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+#eldersafe-lock-overlay input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.8);
+  color: #fff;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+#eldersafe-lock-overlay .lock-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#eldersafe-lock-overlay button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 600;
+  border: none;
+}
+
+#eldersafe-lock-overlay .unlock-btn {
+  background: #00d4aa;
+  color: #0f172a;
+}
+
+#eldersafe-lock-overlay .lock-err {
+  color: #fda4af;
+  font-size: 13px;
+  margin-top: 8px;
+  min-height: 1.2em;
+}

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ElderSafe — Real-Time Scam Protection for Seniors</title>
+  <meta name="description" content="ElderSafe uses AI to protect elderly loved ones from phishing, fake logins, and online scams—instantly, in the browser." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            navy: { DEFAULT: '#0f172a', light: '#1e293b' },
+            emerald: { accent: '#00d4aa' },
+            danger: { DEFAULT: '#e11d48' },
+          },
+          fontFamily: {
+            display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+            body: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          boxShadow: {
+            glass: '0 8px 32px rgba(15, 23, 42, 0.35)',
+            glow: '0 0 40px rgba(0, 212, 170, 0.25)',
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy: #0f172a;
+      --navy-light: #1e293b;
+      --emerald: #00d4aa;
+      --danger: #e11d48;
+      --surface: rgba(30, 41, 59, 0.55);
+      --border: rgba(148, 163, 184, 0.15);
+    }
+    html.light {
+      --surface: rgba(255, 255, 255, 0.72);
+      --border: rgba(15, 23, 42, 0.08);
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .font-display { font-family: 'Space Grotesk', system-ui, sans-serif; }
+
+    .glass {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+    }
+
+    .gradient-mesh {
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0, 212, 170, 0.22), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 10%, rgba(225, 29, 72, 0.12), transparent),
+        radial-gradient(ellipse 50% 30% at 50% 100%, rgba(0, 212, 170, 0.08), transparent);
+    }
+
+    .light .gradient-mesh {
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(0, 212, 170, 0.18), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 10%, rgba(225, 29, 72, 0.08), transparent),
+        radial-gradient(ellipse 50% 30% at 50% 100%, rgba(0, 212, 170, 0.06), transparent);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-float { animation: float 5s ease-in-out infinite; }
+
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 212, 170, 0.35); }
+      50% { opacity: 0.95; box-shadow: 0 0 0 12px rgba(0, 212, 170, 0); }
+    }
+    .animate-pulse-soft { animation: pulse-soft 2.8s ease-in-out infinite; }
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(28px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes scam-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-4px); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+    .scam-popup-anim { animation: scam-shake 0.5s ease-in-out 0.3s; }
+
+    @keyframes counter-tick {
+      from { transform: scale(1.05); }
+      to { transform: scale(1); }
+    }
+    .counter-bump { animation: counter-tick 0.35s ease-out; }
+
+    #live-counter {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      z-index: 45;
+    }
+
+    .browser-chrome {
+      background: linear-gradient(180deg, #e2e8f0 0%, #cbd5e1 100%);
+      border-radius: 10px 10px 0 0;
+    }
+    .light .browser-chrome {
+      background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+    }
+
+    .no-scroll { overflow: hidden; }
+
+    html.light {
+      color-scheme: light;
+    }
+    html.light body {
+      background: #f1f5f9 !important;
+      color: #0f172a;
+    }
+    html.light .text-white {
+      color: #0f172a !important;
+    }
+    html.light .text-slate-300 {
+      color: #334155 !important;
+    }
+    html.light .text-slate-400,
+    html.light .text-slate-500 {
+      color: #64748b !important;
+    }
+    html.light .border-white\/5 {
+      border-color: rgba(15, 23, 42, 0.08) !important;
+    }
+    html.light .bg-navy-light\/30 {
+      background-color: rgba(226, 232, 240, 0.9) !important;
+    }
+    html.light nav a {
+      color: #475569 !important;
+    }
+    html.light .glass {
+      background: rgba(255, 255, 255, 0.82);
+      border-color: rgba(15, 23, 42, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-navy text-slate-100 antialiased gradient-mesh min-h-screen transition-colors duration-300">
+  <!-- Sticky Nav -->
+  <header class="fixed top-0 inset-x-0 z-50 transition-all duration-300" id="site-header">
+    <div class="mx-auto max-w-6xl px-4 sm:px-6">
+      <nav class="mt-4 flex items-center justify-between gap-4 rounded-2xl glass px-4 py-3 shadow-glass">
+        <a href="#" class="flex items-center gap-2 group">
+          <span class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 shadow-lg ring-2 ring-emerald-accent/30 transition group-hover:ring-emerald-accent/60">
+            <svg class="h-6 w-6 text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3L4 6v5c0 5.25 3.5 9.74 8 11 4.5-1.26 8-5.75 8-11V6l-8-3z" fill="currentColor" opacity=".9"/>
+              <circle cx="12" cy="10" r="2.5" fill="#fef3c7"/>
+              <path d="M9.5 14c.8 1.2 2.2 2 4.5 2 2.3 0 3.7-.8 4.5-2" stroke="#fef3c7" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="font-display text-lg font-bold tracking-tight">ElderSafe</span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+          <a href="#how" class="hover:text-emerald-accent transition">How it works</a>
+          <a href="#features" class="hover:text-emerald-accent transition">What you get</a>
+          <a href="#stats" class="hover:text-emerald-accent transition">Results</a>
+          <a href="#demo" class="hover:text-emerald-accent transition">See it in action</a>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button type="button" id="theme-toggle" class="rounded-xl border border-white/10 bg-white/5 p-2.5 text-slate-300 hover:bg-white/10 hover:text-white transition" aria-label="Toggle light and dark mode">
+            <svg class="h-5 w-5 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <svg class="h-5 w-5 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          </button>
+          <a href="#cta" class="hidden sm:inline-flex rounded-xl bg-emerald-accent px-4 py-2.5 text-sm font-semibold text-navy shadow-glow hover:brightness-110 transition">Get ElderSafe</a>
+          <button type="button" id="mobile-menu-btn" class="md:hidden rounded-xl border border-white/10 p-2.5 text-slate-300" aria-expanded="false" aria-controls="mobile-menu">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+        </div>
+      </nav>
+
+      <div id="mobile-menu" class="md:hidden hidden mt-2 rounded-2xl glass p-4 shadow-glass">
+        <div class="flex flex-col gap-3 text-sm font-medium">
+          <a href="#how" class="mobile-link py-2 text-slate-200">How it works</a>
+          <a href="#features" class="mobile-link py-2 text-slate-200">What you get</a>
+          <a href="#stats" class="mobile-link py-2 text-slate-200">Results</a>
+          <a href="#demo" class="mobile-link py-2 text-slate-200">See it in action</a>
+          <a href="#cta" class="mobile-link mt-2 rounded-xl bg-emerald-accent py-3 text-center font-semibold text-navy">Get ElderSafe</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-4 sm:px-6 overflow-hidden">
+      <div class="mx-auto max-w-6xl">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+          <div class="reveal">
+            <div class="inline-flex items-center gap-2 rounded-full border border-emerald-accent/30 bg-emerald-accent/10 px-3 py-1 text-xs font-semibold text-emerald-accent mb-6">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-accent opacity-60"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-accent"></span>
+              </span>
+              Live protection • Chrome extension
+            </div>
+            <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
+              Stop scams <span class="text-emerald-accent">before</span> they reach Mom &amp; Dad.
+            </h1>
+            <p class="mt-6 text-lg text-slate-400 max-w-xl leading-relaxed">
+              ElderSafe watches every page in real time—spotting fake logins, urgent “act now” tricks, and phishing patterns—then gently warns your loved ones before anyone loses money or peace of mind.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-4">
+              <a href="#cta" class="inline-flex items-center justify-center rounded-2xl bg-emerald-accent px-7 py-4 text-base font-semibold text-navy shadow-glow hover:scale-[1.02] active:scale-[0.98] transition">Add to Chrome — Free</a>
+              <button type="button" data-open-demo class="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-7 py-4 text-base font-semibold text-white hover:bg-white/10 transition">
+                Watch 30-sec demo
+              </button>
+            </div>
+            <div class="mt-10 flex flex-wrap items-center gap-6 text-sm text-slate-500">
+              <div class="flex -space-x-2">
+                <img class="h-9 w-9 rounded-full ring-2 ring-navy object-cover" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&h=80&fit=crop" alt="" width="36" height="36" loading="lazy" />
+                <img class="h-9 w-9 rounded-full ring-2 ring-navy object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop" alt="" width="36" height="36" loading="lazy" />
+                <img class="h-9 w-9 rounded-full ring-2 ring-navy object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop" alt="" width="36" height="36" loading="lazy" />
+              </div>
+              <p><span class="text-slate-300 font-semibold">4.9/5</span> from families protecting parents online</p>
+            </div>
+          </div>
+
+          <div class="relative reveal lg:pl-8">
+            <div class="absolute -inset-4 rounded-3xl bg-emerald-accent/10 blur-3xl"></div>
+            <div class="relative rounded-3xl glass p-6 shadow-glass animate-float">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-semibold uppercase tracking-wider text-emerald-accent">Protection status</span>
+                <span class="rounded-full bg-emerald-accent/20 px-2 py-0.5 text-xs font-bold text-emerald-accent">Active</span>
+              </div>
+              <div class="space-y-3">
+                <div class="flex items-center justify-between rounded-xl bg-navy-light/80 px-4 py-3 border border-white/5">
+                  <span class="text-sm text-slate-400">Threat blocked</span>
+                  <span class="font-display font-bold text-danger">Phishing form</span>
+                </div>
+                <div class="flex items-center justify-between rounded-xl bg-navy-light/80 px-4 py-3 border border-white/5">
+                  <span class="text-sm text-slate-400">Confidence</span>
+                  <span class="font-display font-bold text-emerald-accent">94%</span>
+                </div>
+                <div class="h-2 rounded-full bg-white/10 overflow-hidden">
+                  <div class="h-full w-[94%] rounded-full bg-gradient-to-r from-emerald-accent to-teal-400"></div>
+                </div>
+                <p class="text-xs text-slate-500 text-center pt-2">ElderSafe intervened before credentials were entered.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section id="how" class="py-20 px-4 sm:px-6 border-t border-white/5">
+      <div class="mx-auto max-w-6xl">
+        <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">How ElderSafe works</h2>
+          <p class="mt-4 text-slate-400">Three calm, clear steps—built for seniors and the families who love them.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8">
+          <article class="reveal rounded-2xl glass p-8 hover:border-emerald-accent/30 transition border border-transparent">
+            <div class="font-display text-4xl font-bold text-emerald-accent/40 mb-4">01</div>
+            <h3 class="font-display text-xl font-semibold text-white mb-3">Install in one click</h3>
+            <p class="text-slate-400 leading-relaxed">Add ElderSafe from the Chrome Web Store. No accounts required to start—just instant, quiet protection.</p>
+          </article>
+          <article class="reveal rounded-2xl glass p-8 hover:border-emerald-accent/30 transition border border-transparent">
+            <div class="font-display text-4xl font-bold text-emerald-accent/40 mb-4">02</div>
+            <h3 class="font-display text-xl font-semibold text-white mb-3">We scan every page</h3>
+            <p class="text-slate-400 leading-relaxed">Our engine reads the page for scam signals—urgency language, impersonation, risky forms, and known patterns—without slowing browsing.</p>
+          </article>
+          <article class="reveal rounded-2xl glass p-8 hover:border-emerald-accent/30 transition border border-transparent">
+            <div class="font-display text-4xl font-bold text-emerald-accent/40 mb-4">03</div>
+            <h3 class="font-display text-xl font-semibold text-white mb-3">Gentle warnings win</h3>
+            <p class="text-slate-400 leading-relaxed">When something’s wrong, ElderSafe shows a clear red banner with plain-language next steps—so families stay safe without feeling overwhelmed.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- What you get -->
+    <section id="features" class="py-20 px-4 sm:px-6 bg-navy-light/30">
+      <div class="mx-auto max-w-6xl">
+        <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">What you get with ElderSafe</h2>
+          <p class="mt-4 text-slate-400">Everything we wish we’d had before the scam call that sounded “so real.”</p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="reveal rounded-2xl glass p-6 group hover:shadow-glow transition">
+            <div class="h-11 w-11 rounded-xl bg-emerald-accent/15 flex items-center justify-center text-emerald-accent mb-4 group-hover:scale-110 transition">⚡</div>
+            <h3 class="font-display font-semibold text-lg text-white mb-2">Real-time page shield</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Instant analysis as pages load—catching threats before forms are filled.</p>
+          </div>
+          <div class="reveal rounded-2xl glass p-6 group hover:shadow-glow transition">
+            <div class="h-11 w-11 rounded-xl bg-danger/15 flex items-center justify-center text-danger mb-4 group-hover:scale-110 transition">🛡️</div>
+            <h3 class="font-display font-semibold text-lg text-white mb-2">Fake login detection</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Flags password fields on suspicious domains and look-alike sites.</p>
+          </div>
+          <div class="reveal rounded-2xl glass p-6 group hover:shadow-glow transition">
+            <div class="h-11 w-11 rounded-xl bg-emerald-accent/15 flex items-center justify-center text-emerald-accent mb-4 group-hover:scale-110 transition">⏱️</div>
+            <h3 class="font-display font-semibold text-lg text-white mb-2">Urgency &amp; fear tactics</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Spots “verify now,” “account suspended,” and pressure phrases scammers love.</p>
+          </div>
+          <div class="reveal rounded-2xl glass p-6 group hover:shadow-glow transition">
+            <div class="h-11 w-11 rounded-xl bg-emerald-accent/15 flex items-center justify-center text-emerald-accent mb-4 group-hover:scale-110 transition">✓</div>
+            <h3 class="font-display font-semibold text-lg text-white mb-2">Smart whitelist</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Trusted banks and portals stay friction-free—only real risks trigger alerts.</p>
+          </div>
+          <div class="reveal rounded-2xl glass p-6 group hover:shadow-glow transition">
+            <div class="h-11 w-11 rounded-xl bg-danger/15 flex items-center justify-center text-danger mb-4 group-hover:scale-110 transition">🔒</div>
+            <h3 class="font-display font-semibold text-lg text-white mb-2">Maximum Protection Mode</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Optional password lock for high-risk seasons—extra guardrails when you need them.</p>
+          </div>
+          <div class="reveal rounded-2xl glass p-6 group hover:shadow-glow transition">
+            <div class="h-11 w-11 rounded-xl bg-emerald-accent/15 flex items-center justify-center text-emerald-accent mb-4 group-hover:scale-110 transition">📣</div>
+            <h3 class="font-display font-semibold text-lg text-white mb-2">One-click reporting</h3>
+            <p class="text-sm text-slate-400 leading-relaxed">Send scam details to ElderSafe to help protect every family in the network.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section id="stats" class="py-20 px-4 sm:px-6">
+      <div class="mx-auto max-w-6xl">
+        <div class="rounded-3xl glass px-8 py-14 sm:px-14 border border-emerald-accent/20 reveal">
+          <h2 class="font-display text-center text-2xl sm:text-3xl font-bold text-white mb-12">The numbers families care about</h2>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 text-center">
+            <div>
+              <p class="font-display text-4xl sm:text-5xl font-bold text-emerald-accent">2.4M+</p>
+              <p class="mt-2 text-sm text-slate-400">Scam signals analyzed</p>
+            </div>
+            <div>
+              <p class="font-display text-4xl sm:text-5xl font-bold text-white">98%</p>
+              <p class="mt-2 text-sm text-slate-400">Avg. confidence on blocks</p>
+            </div>
+            <div>
+              <p class="font-display text-4xl sm:text-5xl font-bold text-emerald-accent">&lt;100ms</p>
+              <p class="mt-2 text-sm text-slate-400">Typical warning time</p>
+            </div>
+            <div>
+              <p class="font-display text-4xl sm:text-5xl font-bold text-white">24/7</p>
+              <p class="mt-2 text-sm text-slate-400">Always-on protection</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- See it in action -->
+    <section id="demo" class="py-20 px-4 sm:px-6 border-t border-white/5">
+      <div class="mx-auto max-w-6xl text-center">
+        <div class="reveal max-w-2xl mx-auto mb-12">
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">See it in action</h2>
+          <p class="mt-4 text-slate-400">A realistic look at how ElderSafe interrupts a phishing attempt—without scary jargon.</p>
+        </div>
+        <div class="reveal max-w-4xl mx-auto">
+          <button type="button" data-open-demo class="relative rounded-2xl overflow-hidden border border-white/10 shadow-glass group w-full text-left">
+            <div class="aspect-video bg-navy-light flex items-center justify-center relative">
+              <div class="absolute inset-0 bg-gradient-to-t from-navy via-transparent to-transparent opacity-80"></div>
+              <span class="relative z-10 inline-flex items-center gap-3 rounded-full bg-white/10 backdrop-blur px-6 py-3 text-white font-semibold group-hover:bg-emerald-accent group-hover:text-navy transition">
+                <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                Open interactive preview
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="cta" class="py-24 px-4 sm:px-6">
+      <div class="mx-auto max-w-4xl text-center reveal">
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-white">Give your parents the internet they deserve—safer.</h2>
+        <p class="mt-4 text-slate-400 text-lg">Free to start. Loved by families. Built with empathy for seniors.</p>
+        <div class="mt-10 flex flex-wrap justify-center gap-4">
+          <a href="#" class="inline-flex rounded-2xl bg-emerald-accent px-8 py-4 text-base font-bold text-navy shadow-glow hover:brightness-110 transition">Get ElderSafe for Chrome</a>
+          <a href="mailto:hello@eldersafe.app" class="inline-flex rounded-2xl border border-white/15 px-8 py-4 text-base font-semibold text-white hover:bg-white/5 transition">Talk to us</a>
+        </div>
+        <p class="mt-8 text-xs text-slate-500">ElderSafe is designed to assist—not replace—judgment and trusted caregivers. For emergencies, contact local authorities.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/5 py-10 px-4 sm:px-6">
+    <div class="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+      <div class="flex items-center gap-2">
+        <span class="font-display font-bold text-slate-300">ElderSafe</span>
+        <span>© 2026</span>
+      </div>
+      <div class="flex gap-6">
+        <a href="#" class="hover:text-emerald-accent transition">Privacy</a>
+        <a href="#" class="hover:text-emerald-accent transition">Terms</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating counter -->
+  <div id="live-counter" class="reveal rounded-2xl glass px-4 py-3 shadow-glass border border-emerald-accent/20">
+    <p class="text-[10px] uppercase tracking-wider text-emerald-accent font-semibold">Live • Families protected</p>
+    <p class="font-display text-xl font-bold text-white tabular-nums" id="counter-value">12,487</p>
+  </div>
+
+  <!-- Demo modal -->
+  <div id="demo-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-navy/80 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="demo-title">
+    <div class="relative w-full max-w-3xl rounded-2xl glass border border-white/10 shadow-glass overflow-hidden max-h-[90vh] overflow-y-auto">
+      <button type="button" id="demo-close" class="absolute top-4 right-4 z-10 rounded-full bg-white/10 p-2 text-white hover:bg-white/20" aria-label="Close">
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="p-6 sm:p-8">
+        <h3 id="demo-title" class="font-display text-xl font-bold text-white mb-6">See ElderSafe stop a scam</h3>
+        <!-- macOS-style browser -->
+        <div class="rounded-xl overflow-hidden border border-slate-600/50 shadow-2xl bg-slate-800">
+          <div class="browser-chrome flex items-center gap-2 px-3 py-2.5 border-b border-slate-400/30">
+            <div class="flex gap-1.5">
+              <span class="h-3 w-3 rounded-full bg-red-400"></span>
+              <span class="h-3 w-3 rounded-full bg-amber-400"></span>
+              <span class="h-3 w-3 rounded-full bg-green-400"></span>
+            </div>
+            <div class="flex-1 mx-3 rounded-md bg-white/60 px-3 py-1 text-xs text-slate-600 truncate flex items-center gap-2">
+              <svg class="h-3.5 w-3.5 text-slate-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+              <span id="demo-url" class="font-mono">secure-verify-bank.co/login</span>
+            </div>
+          </div>
+          <div class="relative bg-slate-100 light:bg-slate-100 p-8 min-h-[220px] flex items-start justify-center">
+            <div class="w-full max-w-sm rounded-lg bg-white shadow-md p-6 text-center text-slate-600 text-sm">
+              <p class="font-semibold text-slate-800">Sign in to your account</p>
+              <p class="mt-2 text-xs">Your session has expired. Verify now to avoid suspension.</p>
+            </div>
+            <!-- Animated scam popup -->
+            <div id="scam-popup" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md rounded-xl border-2 border-danger bg-white p-5 shadow-xl scam-popup-anim opacity-0 scale-95 transition-all duration-500">
+              <div class="flex items-start gap-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger/15 text-danger text-xl">!</div>
+                <div>
+                  <p class="font-display font-bold text-danger text-lg">ElderSafe Warning</p>
+                  <p class="mt-1 text-sm text-slate-700">This page shows signs of a <strong>phishing scam</strong>. Do not enter passwords or card numbers.</p>
+                  <div class="mt-4 flex gap-2">
+                    <span class="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">Confidence: 94%</span>
+                    <span class="rounded-lg bg-emerald-accent/20 px-3 py-1.5 text-xs font-semibold text-emerald-700">Stay safe — Go back</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="mt-4 text-sm text-slate-400 text-center">Animation loops so you can see the moment ElderSafe steps in.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const html = document.documentElement;
+      const stored = localStorage.getItem('eldersafe-theme');
+      if (stored === 'light') {
+        html.classList.add('light');
+        html.classList.remove('dark');
+      } else {
+        html.classList.add('dark');
+        html.classList.remove('light');
+      }
+
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        html.classList.toggle('light');
+        html.classList.toggle('dark');
+        localStorage.setItem('eldersafe-theme', html.classList.contains('light') ? 'light' : 'dark');
+      });
+
+      const header = document.getElementById('site-header');
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > 24) {
+          header.classList.add('shadow-glass');
+        } else {
+          header.classList.remove('shadow-glass');
+        }
+      }, { passive: true });
+
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileBtn.addEventListener('click', function () {
+        const open = mobileMenu.classList.toggle('hidden');
+        mobileBtn.setAttribute('aria-expanded', String(!open));
+      });
+      mobileMenu.querySelectorAll('.mobile-link').forEach(function (a) {
+        a.addEventListener('click', function () {
+          mobileMenu.classList.add('hidden');
+          mobileBtn.setAttribute('aria-expanded', 'false');
+        });
+      });
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) e.target.classList.add('visible');
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal').forEach(function (el) { observer.observe(el); });
+
+      var counterEl = document.getElementById('counter-value');
+      var base = 12487;
+      setInterval(function () {
+        base += Math.floor(Math.random() * 3) + 1;
+        counterEl.textContent = base.toLocaleString();
+        counterEl.classList.remove('counter-bump');
+        void counterEl.offsetWidth;
+        counterEl.classList.add('counter-bump');
+      }, 4000);
+
+      var modal = document.getElementById('demo-modal');
+      var scamPopup = document.getElementById('scam-popup');
+      var demoUrl = document.getElementById('demo-url');
+
+      function openModal() {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.classList.add('no-scroll');
+        runDemoAnim();
+      }
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.classList.remove('no-scroll');
+      }
+
+      var animTimer;
+      function runDemoAnim() {
+        clearTimeout(animTimer);
+        scamPopup.classList.add('opacity-0', 'scale-95');
+        scamPopup.classList.remove('opacity-100', 'scale-100');
+        demoUrl.textContent = 'secure-verify-bank.co/login';
+        animTimer = setTimeout(function () {
+          scamPopup.classList.remove('opacity-0', 'scale-95');
+          scamPopup.classList.add('opacity-100', 'scale-100');
+        }, 800);
+      }
+
+      document.querySelectorAll('[data-open-demo]').forEach(function (btn) {
+        btn.addEventListener('click', openModal);
+      });
+      document.getElementById('demo-close').addEventListener('click', closeModal);
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      setInterval(function () {
+        if (!modal.classList.contains('hidden')) runDemoAnim();
+      }, 4500);
+    })();
+  </script>
+</body>
+</html>
