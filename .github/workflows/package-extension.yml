@@ -31,9 +31,31 @@ jobs:
           set -euo pipefail
           VERSION="$(jq -r '.version' eldersafe-extension/manifest.json)"
           OUT="eldersafe-extension-v${VERSION}.zip"
-          (cd eldersafe-extension && zip -r "../${OUT}" . -x '*.git*' -x '**/.DS_Store')
+          # Zip CONTENTS of eldersafe-extension so manifest.json is at the root (not eldersafe-extension/manifest.json).
+          (cd eldersafe-extension && zip -r "../${OUT}" . \
+            -x '*.git*' \
+            -x '**/.DS_Store' \
+            -x 'test-fixtures/*' \
+            -x 'package-webstore.sh')
           echo "zip_path=${OUT}" >> "${GITHUB_OUTPUT}"
           ls -la "$OUT"
+
+      - name: Verify manifest.json at ZIP root
+        run: |
+          OUT="${{ steps.pack.outputs.zip_path }}"
+          python3 << 'PY'
+          import sys, zipfile
+          path = "${{ steps.pack.outputs.zip_path }}"
+          with zipfile.ZipFile(path, "r") as z:
+              for n in z.namelist():
+                  parts = [p for p in n.replace("\\", "/").lstrip("./").split("/") if p]
+                  if parts == ["manifest.json"]:
+                      print("OK: manifest at zip root:", n)
+                      sys.exit(0)
+              print("ERROR: manifest.json must be at root of the zip (not inside a subfolder).", file=sys.stderr)
+              print("Entries:", z.namelist()[:30], file=sys.stderr)
+              sys.exit(1)
+          PY
 
       - name: Upload ZIP artifact
         uses: actions/upload-artifact@v4
@@ -47,7 +69,8 @@ jobs:
           {
             echo '### ElderSafe extension package'
             echo ''
-            echo '**Download the ZIP:** on this run’s page, open the **Artifacts** section below the job log and click **eldersafe-extension-zip**.'
+            echo '**Chrome Web Store:** GitHub wraps the file in a second zip. **Extract** the downloaded artifact, then upload the **inner** file `eldersafe-extension-v*.zip`.'
+            echo 'Do **not** upload the GitHub artifact zip itself — it has no `manifest.json` at root (only a nested zip).'
             echo ''
-            echo 'The archive is Chrome Web Store–ready (`manifest.json` at the root).'
+            echo '**Download:** this run → **Artifacts** → **eldersafe-extension-zip** → extract → upload **`eldersafe-extension-v*.zip`**.'
           } >> "$GITHUB_STEP_SUMMARY"

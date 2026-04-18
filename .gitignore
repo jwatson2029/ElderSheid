@@ -1,0 +1,3 @@
+# Local Chrome Web Store packages (run eldersafe-extension/package-webstore.sh)
+eldersafe-extension-webstore-v*.zip
+eldersafe-extension-v*.zip

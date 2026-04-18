@@ -18,6 +18,23 @@ ElderSafe is a Manifest V3 Chrome extension that helps protect seniors from comm
 3. Click **Load unpacked** and select the `eldersafe-extension` folder.
 4. Click the ElderSafe icon to open **Settings** (no popup).
 
+## Package for Chrome Web Store
+
+The uploaded **`.zip` must have `manifest.json` at the root** (same level as `background.js`), not inside a parent folder.
+
+**Common mistake:** zipping the `eldersafe-extension` folder so the store sees `eldersafe-extension/manifest.json` — that is rejected.
+
+**Correct:**
+
+- **CI:** Download the GitHub Actions artifact **eldersafe-extension-zip**, **unzip it on your computer**, then upload the **inner** file `eldersafe-extension-v*.zip`. The outer download is only a wrapper; uploading it to the Web Store will error with “No manifest found”.
+- **Local:** from the `eldersafe-extension` folder run:
+
+  ```bash
+  chmod +x package-webstore.sh && ./package-webstore.sh
+  ```
+
+  Then upload the generated `eldersafe-extension-webstore-v*.zip` from the **parent** folder (`ElderSheid/`).
+
 ## Icons
 
 PNG icons in `icons/` are required for the Chrome Web Store. Regenerate them if you replace branding.
