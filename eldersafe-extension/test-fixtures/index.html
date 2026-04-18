@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>ElderSafe — local test pages</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 1.5rem; line-height: 1.5; }
+    a { color: #0f766e; font-weight: 600; }
+    code { background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+    .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; }
+    .warn { background: #fff7ed; border-color: #fdba74; }
+  </style>
+</head>
+<body>
+  <h1>ElderSafe test fixtures</h1>
+  <p>Load the extension (<strong>Load unpacked</strong> → <code>eldersafe-extension</code>), then open:</p>
+
+  <div class="card warn">
+    <strong>Suspicious demo</strong> — should show the red ElderSafe banner within a few seconds.
+    <p><a href="suspicious-demo.html">Open suspicious-demo.html</a></p>
+  </div>
+
+  <div class="card">
+    <strong>Clean demo</strong> — should <em>not</em> show a warning.
+    <p><a href="clean-demo.html">Open clean-demo.html</a></p>
+  </div>
+
+  <p style="font-size: 0.875rem; color: #64748b;">
+    Server: <code>python3 -m http.server 8765 --bind 127.0.0.1</code> from this folder.
+    Then visit <code>http://127.0.0.1:8765/</code>
+  </p>
+</body>
+</html>
