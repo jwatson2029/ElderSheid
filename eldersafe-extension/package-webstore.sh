@@ -17,7 +17,8 @@ zip -r "$OUT_ABS" . \
   -x '**/.DS_Store' \
   -x '*.zip' \
   -x 'package-webstore.sh' \
-  -x 'test-fixtures/*'
+  -x 'test-fixtures/*' \
+  -x 'store-assets/*'
 
 VERIFY_ZIP="$OUT_ABS" python3 << 'PY'
 import os, sys, zipfile
